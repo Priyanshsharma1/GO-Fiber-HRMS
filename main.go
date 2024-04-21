@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +21,6 @@ type MongoInstance struct {
 var mg MongoInstance
 
 const dbName = "fiber-hrms"
-const mongoURI = "mongodb://localhost:27017/" + dbName
 
 type Employee struct {
 	ID     string  `json:"id,omitempty" bson:"_id,omitempty"`
@@ -30,7 +30,14 @@ type Employee struct {
 }
 
 func Connect() error {
+	mongoURI := os.Getenv("MONGO_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb://localhost:27017/" + dbName
+	}
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	if err != nil {
+		return err
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -54,6 +61,11 @@ func main() {
 		log.Fatal(err)
 	}
 	app := fiber.New()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
 
 	app.Get("/employee", func(c *fiber.Ctx) error {
 
@@ -164,5 +176,5 @@ func main() {
 
 	})
 
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen(":" + port))
 }

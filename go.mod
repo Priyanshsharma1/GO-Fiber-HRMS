@@ -1,4 +1,4 @@
-module github.com/akhil/go-fiber-mongo-hrms
+module github.com/Priyanshsharma1/fiber-mongo-hrms
 
 go 1.16
 
